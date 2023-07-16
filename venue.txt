@@ -1,0 +1,2 @@
+A:A101:Deluxe:3:IDK:Available
+A:A102:Deluxe:3:KIO:Available
