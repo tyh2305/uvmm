@@ -176,9 +176,10 @@ search_patron_details() {
 
     # Read patron.txt file
     patron_file=$(cat patron.txt)
-    # Split patron.txt file by new line
+    found=false
+
     # Loop through patron.txt file
-    for line in $patron_file; do
+    while IFS= read -r line; do
       # Split patron.txt file by :
       IFS=':' read -ra patron_dat <<<"$line"
       # Check if patron id is equal to patron id in patron.txt file
@@ -187,11 +188,15 @@ search_patron_details() {
         echo -e "Contact Number: ${patron_dat[2]}"
         echo -e "Email Address: ${patron_dat[3]}"
         echo -e "$break_line"
+        found=true
         break
-      else
-        echo -e "Patron ID not found"
       fi
-    done
+
+    done <<<"$patron_file"
+
+    if [ "$found" = false ]; then
+      echo -e "Patron ID not found"
+    fi
 
     read -rp "Search Another Patron? (y) es or (q)uit:" search_another_patron
     if [ "$search_another_patron" = "q" ]; then
