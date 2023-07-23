@@ -21,12 +21,77 @@ main_menu() {
   clear
 }
 
+check_patron_id() {
+
+  patron_id=$1
+  if [ -z "$patron_id" ]; then
+    echo 2
+    return
+  fi
+
+  # Read patron.txt file
+  patron_file=$(cat patron.txt)
+  # Split patron.txt file by new line
+  # Loop through patron.txt file
+  for line in $patron_file; do
+    # Split patron.txt file by :
+    IFS=':' read -ra patron_dat <<<"$line"
+    # Check if patron id is equal to patron id in patron.txt file
+    if [ "$patron_id" = "${patron_dat[0]}" ]; then
+      echo 1
+      return
+    fi
+  done
+}
+
+check_patron_name() {
+  patron_name=$1
+
+  # Check name only contains alphabets and spaces
+  if [[ "$patron_name" =~ ^[a-zA-Z[:space:]]+$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+
+}
+
+check_patron_contact() {
+  patron_contact=$1
+
+  # Check contact only contains number and + - symbol
+  if [[ "$patron_contact" =~ ^[0-9+-]+$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+
+}
+
+check_patron_email() {
+  patron_email=$1
+
+  # Check email address is valid
+  if [[ "$patron_email" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+}
+
 write_patron() {
   patron_id=$1
   patron_full_name=$2
   patron_contact_number=$3
   patron_email_address=$4
-  echo -e "$patron_id:$patron_full_name:$patron_contact_number:$patron_email_address\n" >>patron.txt
+
+  echo -e "$patron_id:$patron_full_name:$patron_contact_number:$patron_email_address" >>patron.txt
 }
 
 # Task 2
@@ -38,13 +103,62 @@ register_patron() {
   while true; do
     echo -e "$patron_menu"
     echo -e "$break_line"
+
     read -rp "Patron ID (As per TARUMT format):" patron_id
+    # Patron ID Validation
+    flag=$(check_patron_id "$patron_id")
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Patron ID already exist \nPlease try again\n\n"
+      continue
+    elif [ "$flag" == 2 ]; then
+      clear
+      echo -e "Patron ID cannot be empty \nPlease try again\n\n"
+      continue
+    fi
+
     read -rp "Patron Full Name (As per NRIC):" patron_full_name
+    # Patron Full Name Validation
+    flag=$(check_patron_name "$patron_full_name")
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Patron Name should only contains alphabets\nPlease try again\n\n"
+      continue
+      #elif [ "$flag" == "2" ]; then
+      # clear
+      # echo -e "Patron Name cannot be empty\nPlease try again\n\n"
+      # continue
+    fi
+
     read -rp "Contact Number:" patron_contact_number
+    # Patron Contact Number Validation
+    flag=$(check_patron_contact "$patron_contact_number")
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Patron Contact Number should only contains number and + - symbol\nPlease try again\n\n"
+      continue
+    elif [ "$flag" == "2" ]; then
+      clear
+      echo -e "Patron Contact Number cannot be empty\nPlease try again\n\n"
+      continue
+    fi
+
     read -rp "Email Address:" patron_email_address
+    # Patron Email Address Validation
+    flag=$(check_patron_email "$patron_email_address")
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Patron Email Address is not valid\nPlease try again\n\n"
+      continue
+    elif [ "$flag" == "2" ]; then
+      clear
+      echo -e "Patron Email Address cannot be empty\nPlease try again\n\n"
+      continue
+    fi
     echo -e "$empty_line"
 
     write_patron "$patron_id" "$patron_full_name" "$patron_contact_number" "$patron_email_address"
+
     read -rp "Register Another Patron? (y) es or (q)uit:" register_another_patron
     if [ "$register_another_patron" = "q" ]; then
       break
@@ -153,7 +267,7 @@ book_venue() {
     # Check if patron id is equal to patron id in patron.txt file
     if [ "$patron_id" = "${patron_dat[0]}" ]; then
       echo -e "Patron Name: ${patron_dat[1]}"
-      patron_name="${patron_dat[1]}"
+      patron_contact="${patron_dat[1]}"
       break
     fi
   done
@@ -203,7 +317,7 @@ book_venue() {
   filename="${patron_id}_${room_number}_${booking_date}.txt"
   touch "$filename"
   echo -e "Venue Booking Details \n\n" >>"$filename"
-  echo -e "Patron ID: $patron_id \t\t\t\t Patron Name: $patron_name" >>"$filename"
+  echo -e "Patron ID: $patron_id \t\t\t\t Patron Name: $patron_contact" >>"$filename"
   echo -e "Room Number: $room_number" >>"$filename"
   echo -e "Data Booking: $booking_date" >>"$filename"
   echo -e "Time From: $time_from \t\t\t\t Time To: $time_to" >>"$filename"
