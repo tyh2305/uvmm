@@ -266,16 +266,23 @@ book_venue() {
   read -rp "Please enter the Patron's ID Number:" patron_id
 
   # Read from file to find the patron name
-  for line in $patron_file; do
+  patron_file=$(cat patron.txt)
+  found=false
+  while IFS= read -r line; do
     # Split patron.txt file by :
     IFS=':' read -ra patron_dat <<<"$line"
     # Check if patron id is equal to patron id in patron.txt file
     if [ "$patron_id" = "${patron_dat[0]}" ]; then
       echo -e "Patron Name: ${patron_dat[1]}"
+      found=true
       patron_contact="${patron_dat[1]}"
       break
     fi
-  done
+  done <<< "$patron_file"
+  if [ "$found" = false ]; then
+    echo -e "Patron ID not found"
+    return
+  fi
 
   read -rp "Press (n) to proceed Book Venue or (q) to return to University Venue Management Menu:" proceed_book_venue
   if [ "$proceed_book_venue" = "q" ]; then
