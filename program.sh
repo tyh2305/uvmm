@@ -161,6 +161,7 @@ register_patron() {
 
     read -rp "Register Another Patron? (y) es or (q)uit:" register_another_patron
     if [ "$register_another_patron" = "q" ]; then
+      clear
       break
     fi
     clear
@@ -206,23 +207,140 @@ search_patron_details() {
   done
 }
 
+#Check Block Name
+check_block_name(){
+  block_name=$1
+
+  # Check name only contains alphabets
+  if [[ "$block_name" =~ ^[a-zA-Z]+$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+}
+
+# Check Room Number
+check_room_number(){
+  room_number=$1
+
+  # Check room number only contains alphabets and numbers
+  if [[ "$room_number" =~ ^[a-zA-Z0-9]+$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+}
+
+# Check Room Type
+check_room_type(){
+  room_type=$1
+
+  # Check room type only contains alphabets
+  if [[ "$room_type" =~ ^[a-zA-Z[:space:]]+$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+}
+
+# Check Capacity
+check_capacity(){
+  capacity=$1
+
+  # Check capacity only contains numbers
+  if [[ "$capacity" =~ ^[0-9]+$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+}
+
+# Check Status
+check_status(){
+  status=$1
+
+  # Check status only contains alphabets
+  if [[ "$status" =~ ^[a-zA-Z]+$ ]]; then
+    echo 0
+    return
+  else
+    echo 1
+    return
+  fi
+}
+
 # Task 3
 ## Add new venue
 add_new_venue() {
+  flag=true
+
   while true; do
     echo -e "Add New Venue\n"
-    echo -e "$break_line $break_line"
+    echo -e "$break_line"
 
-    read -rp "Block Name:" block_name
-    read -rp "Room Number:" room_number
-    read -rp "Room Type:" room_type
-    read -rp "Capacity:" capacity
-    read -rp "Remarks:" remarks
-    read -rp "Status (by default):" status
+    read -rp "Block Name (Only alphabets): " block_name
+    flag=$(check_block_name "$block_name")
 
-    echo -e "\n$block_name:$room_number:$room_type:$capacity:$remarks:$status" >>venue.txt
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Block Name should only contains alphabets\nPlease try again\n\n"
+      continue
+    else
+      block_name=${block_name^^}
+    fi
+
+    read -rp "Room Number (Only alphabets and/or numbers): " room_number
+    flag=$(check_room_number "$room_number")
+
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Room number should only contains alphabets and numbers\nPlease try again\n\n"
+      continue
+    else
+      room_number=${room_number^^}
+    fi
+
+    read -rp "Room Type: " room_type
+    flag=$(check_room_type "$room_type")
+
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Room type should only contains alphabets\nPlease try again\n\n"
+      continue
+    fi 
+
+    read -rp "Capacity: " capacity
+    flag=$(check_capacity "$capacity")
+
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Capacity should only contains numbers\nPlease try again\n\n"
+      continue
+    fi
+
+    read -rp "Remarks: " remarks
+
+    read -erp "Status (by default): " -i "Available" status
+    flag=$(check_status "$status")
+
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Status should only contains alphabets\nPlease try again\n\n"
+      continue
+    fi
+
+    echo -e "$block_name:$room_number:$room_type:$capacity:$remarks:$status" >> venue.txt
     read -rp "Add Another Venue? (y) es or (q)uit:" add_another_venue
     if [ "$add_another_venue" = "q" ]; then
+      clear
       break
     fi
     clear
