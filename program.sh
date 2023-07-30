@@ -1,3 +1,10 @@
+# Title: University Venue Management System
+# Author1: Tan Yi Hong
+# Author2: Ong Tun Jiun
+# Date: 30/07/2023
+# Course: BACS2093 Operating Systems
+# Purpose: University Venue Management System
+
 #!/bin/bash
 
 # Common Variables
@@ -207,7 +214,15 @@ search_patron_details() {
   done
 }
 
-#Check Block Name
+
+
+
+# Check Block Name
+# ================
+# Author: Ong Tun Jiun
+# Description: Check block name only contains alphabets
+# Input: block_name
+# Output: 0 if block name only contains alphabets, 1 if block name contains other than alphabets
 check_block_name(){
   block_name=$1
 
@@ -222,6 +237,12 @@ check_block_name(){
 }
 
 # Check Room Number
+# =================
+# Author: Ong Tun Jiun
+# Task: 3 - Add New Venue
+# Description: Check room number only contains alphabets and numbers
+# Input: room_number
+# Output: 0 if room number only contains alphabets and numbers, 1 if room number contains other than alphabets and numbers
 check_room_number(){
   room_number=$1
 
@@ -236,6 +257,12 @@ check_room_number(){
 }
 
 # Check Room Type
+# ===============
+# Author: Ong Tun Jiun
+# Task: 3 - Add New Venue
+# Description: Check room type only contains alphabets
+# Input: room_type
+# Output: 0 if room type only contains alphabets, 1 if room type contains other than alphabets
 check_room_type(){
   room_type=$1
 
@@ -250,6 +277,12 @@ check_room_type(){
 }
 
 # Check Capacity
+# ==============
+# Author: Ong Tun Jiun
+# Task: 3 - Add New Venue
+# Description: Check capacity only contains numbers
+# Input: capacity
+# Output: 0 if capacity only contains numbers, 1 if capacity contains other than numbers
 check_capacity(){
   capacity=$1
 
@@ -264,6 +297,12 @@ check_capacity(){
 }
 
 # Check Status
+# ============
+# Author: Ong Tun Jiun
+# Task: 3 - Add New Venue
+# Description: Check status only contains alphabets
+# Input: status
+# Output: 0 if status only contains alphabets, 1 if status contains other than alphabets
 check_status(){
   status=$1
 
@@ -277,8 +316,13 @@ check_status(){
   fi
 }
 
-# Task 3
-## Add new venue
+# Add New Venue
+# =============
+# Author: Ong Tun Jiun
+# Task: 3 - Add New Venue
+# Description: Get user input, validate input and save to venue.txt file
+# Input: -
+# Output: -
 add_new_venue() {
   flag=true
 
