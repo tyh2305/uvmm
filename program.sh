@@ -246,14 +246,30 @@ check_block_name(){
 check_room_number(){
   room_number=$1
 
+  flag=0
+
   # Check room number only contains alphabets and numbers
   if [[ "$room_number" =~ ^[a-zA-Z0-9]+$ ]]; then
-    echo 0
-    return
+    flag=0
   else
-    echo 1
-    return
+    flag=1
   fi
+
+  # Read venue.txt file
+  venue_file=$(cat venue.txt)
+
+  # Loop through venue.txt file
+  for line in $venue_file; do
+    # Split venue.txt file by :
+    IFS=':' read -ra venue_dat <<<"$line"
+    # Check if room number is equal to room number in venue.txt file
+    if [ "$room_number" = "${venue_dat[1]}" ]; then
+      flag=2
+    fi
+  done
+
+  echo $flag
+  return
 }
 
 # Check Room Type
@@ -347,6 +363,10 @@ add_new_venue() {
     if [ "$flag" == "1" ]; then
       clear
       echo -e "Room number should only contains alphabets and numbers\nPlease try again\n\n"
+      continue
+    elif [ "$flag" == "2" ]; then
+      clear
+      echo -e "Room number already exist\nPlease try again\n\n"
       continue
     else
       room_number=${room_number^^}
