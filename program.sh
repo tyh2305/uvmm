@@ -402,6 +402,8 @@ add_new_venue() {
     fi
 
     echo -e "$block_name:$room_number:$room_type:$capacity:$remarks:$status" >> venue.txt
+    
+    echo -e "$empty_line" 
     read -rp "Add Another Venue? Type any to continue, Type Q to quit: " add_another_venue
     if [ "$add_another_venue" = "q" ] || [ "$add_another_venue" = "Q" ] ; then
       clear
@@ -411,11 +413,19 @@ add_new_venue() {
   done
 }
 
-## List Venue Details
+# List Venue Details
+# =============
+# Author: Ong Tun Jiun
+# Task: 3 - List Venue Details
+# Description: Get user input, validate input and list venue details
+# Input: -
+# Output: -
+
 list_venue_details() {
   while true; do
     echo -e "List Venue Details"
     
+    # Input block name and do validation
     read -rp "Enter Block name (Only alphabets):" block_name
     flag=$(check_block_name "$block_name")
 
@@ -445,16 +455,19 @@ list_venue_details() {
       IFS=':' read -ra venue_dat <<<"$line"
       # Check if block name is equal to block name in venue.txt file
       if [ "$block_name" = "${venue_dat[0]}" ]; then
-        # echo -e "${venue_dat[1]} \t\t${venue_dat[2]} \t${venue_dat[3]} \t\t${venue_dat[4]} \t${venue_dat[5]}"
+        # Save data to temp.txt file
         echo -e "${venue_dat[1]}:${venue_dat[2]}:${venue_dat[3]}:${venue_dat[4]}:${venue_dat[5]}" >> temp.txt  
       fi
     done <<< "$venue_file"
 
+    # Count number of lines in temp.txt file
     noOfLines=$(wc -l < temp.txt)
     
+    # Check if number of lines is 1, then print no venue found
     if [ "$noOfLines" -eq 1 ]; then
       echo -e "No venue found"
     else
+      # Print table with column separator :
       column -t -s ':' temp.txt
     fi
 
