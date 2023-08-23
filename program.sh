@@ -215,11 +215,18 @@ register_patron() {
 
     write_patron "$patron_id" "$patron_full_name" "$patron_contact_number" "$patron_email_address"
 
-    read -rp "Register Another Patron? (y) es or (q)uit:" register_another_patron
-    if [ "$register_another_patron" = "q" ]; then
-      clear
-      break
-    fi
+    while true; do
+      read -rp "Register Another Patron? (y)es or (q)uit: " register_another_patron
+      if [ "$register_another_patron" = "q" ] || [ "$register_another_patron" = "Q" ]; then
+        clear
+        return
+      elif [ "$register_another_patron" = "y" ] || [ "$register_another_patron" = "Y" ]; then
+        break
+      else
+        # Delete previous two lines and print invalid input
+        echo -e "\033[2A\033[KInvalid input"
+      fi
+    done 
     clear
   done
 }
@@ -261,11 +268,19 @@ search_patron_details() {
       echo -e "Patron ID not found"
     fi
 
-    read -rp "Search Another Patron? (y) es or (q)uit:" search_another_patron
-    if [ "$search_another_patron" = "q" ]; then
-      clear
-      break
-    fi
+    echo -e "$empty_line"
+    while true;do
+      read -rp "Search Another Patron? (y) es or (q)uit:" search_another_patron
+      if [ "$search_another_patron" = "q" ] || [ "$search_another_patron" = "Q" ]; then
+        clear
+        return
+      elif [ "$search_another_patron" = "y" ] || [ "$search_another_patron" = "Y" ]; then
+        break
+      else
+        # Delete previous two lines and print invalid input
+        echo -e "\033[2A\033[KInvalid input"
+      fi
+    done
     clear
   done
 }
@@ -460,11 +475,19 @@ add_new_venue() {
     echo -e "$block_name:$room_number:$room_type:$capacity:$remarks:$status" >> venue.txt
 
     echo -e "$empty_line"
-    read -rp "Add Another Venue? Type any to continue, Type Q to quit: " add_another_venue
-    if [ "$add_another_venue" = "q" ] || [ "$add_another_venue" = "Q" ] ; then
-      clear
-      break
-    fi
+
+    while true; do
+      read -rp "Add Another Venue? (y)es or (q)uit: " add_another_venue
+      if [ "$add_another_venue" = "q" ] || [ "$add_another_venue" = "Q" ] ; then
+        clear
+        return
+      elif [ "$add_another_venue" = "y" ] || [ "$add_another_venue" = "Y" ] ; then
+        break
+      else
+        # Delete previous two lines and print invalid input
+        echo -e "\033[2A\033[KInvalid input"
+      fi
+    done
     clear
   done
 }
@@ -529,11 +552,19 @@ list_venue_details() {
     rm temp.txt
 
     echo -e "$empty_line"
-    read -rp "Search Another Block Venue? Type any to continue, Type Q to quit: " search_another_venue
-    if [ "$search_another_venue" = "q" ] || [ "$search_another_venue" = "Q" ]; then
-      clear
-      break
-    fi
+
+    while true; do
+      read -rp "Search Another Block Venue? (y)es or (q)uit: " search_another_venue
+      if [ "$search_another_venue" = "q" ] || [ "$search_another_venue" = "Q" ]; then
+        clear
+        return
+      elif [ "$search_another_venue" = "y" ] || [ "$search_another_venue" = "Y" ]; then
+        break
+      else
+        # Delete previous two lines and print invalid input
+        echo -e "\033[2A\033[KInvalid input"
+      fi
+    done
     clear
   done
 }
@@ -845,6 +876,8 @@ book_venue() {
 
   read -rp "Reason of Booking: " reason_of_booking
 
+  echo -e "$empty_line"
+
   while true; do
     read -rp "Press (s) to save and generate the venue booking details or Press (c) to cancel the Venue Booking and return to University Venue Management Menu:" save_generate_venue_booking
     if [ "$save_generate_venue_booking" = "c" ] || [ "$save_generate_venue_booking" = "C" ] ; then
@@ -868,8 +901,8 @@ book_venue() {
       echo -e "\n\n\tThis is a computer generated receipt with no signature required\n" >>"$filename"
       return
     else
-      clear
-      echo -e "Invalid input\n\n"
+      # Delete previous two lines and print invalid input
+      echo -e "\033[2A\033[KInvalid input"
     fi
   done
 }
