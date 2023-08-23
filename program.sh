@@ -504,7 +504,6 @@ list_venue_details() {
     # Read venue.txt file
     venue_file=$(cat venue.txt)
 
-
     # Loop through venue.txt file
     while IFS= read -r line; do
       # Split venue.txt file by :
@@ -560,28 +559,53 @@ check_booking_date() {
 
 # Check Time From
 check_time_from() {
-  time_from=$1
-  flag=0
-
+  room_number=$1
+  booking_date=$2
+  time_from=$3
+  
   # Check if time from follows the format of hh:mm
   if [[ ! "$time_from" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
-    flag=1
+    echo 1
+    return
   # Check if time is valid
   elif ! date -d "$time_from" >/dev/null 2>&1; then
-    flag=2
+    echo 2
+    return
   # Check if time from is between 08:00 to 19.30
   elif [[ "$time_from" < "08:00" ]] || [[ "$time_from" > "19:30" ]]; then
-    flag=3
+    echo 3
+    return
   fi 
+
+  # Check through booking.txt file to detect clashes
+  booking_file=$(cat booking.txt)
+
+  # Loop through booking.txt file
+  while IFS= read -r line; do
+    # Split booking.txt file by :
+    IFS=':' read -ra booking_dat <<<"$line"
+    # Check if block name is equal to block name in venue.txt file  
+    if [ "$room_number" = "${booking_dat[1]}" ]; then
+      if [[ "$booking_date" != "${booking_dat[2]}" ]]; then
+        continue
+      fi
+
+      if [[ ! "$time_from" < "${booking_dat[3]}:${booking_dat[4]}" ]] && [[ "$time_from" < "${booking_dat[5]}:${booking_dat[6]}" ]]; then
+        echo 4
+        return
+      fi
+    fi
+  done <<< "$booking_file"
   
-  echo $flag
+  echo 0
 }
 
 # Check Time To
 check_time_to() {
-  time_from=$1
-  time_to=$2
-  # flag=0
+  room_number=$1
+  booking_date=$2
+  time_from=$3
+  time_to=$4
 
   # Check if time to follows the format of hh:mm
   if [[ ! "$time_to" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
@@ -613,6 +637,29 @@ check_time_to() {
     echo 5
     return
   fi
+
+  # Check through booking.txt file to detect clashes
+  booking_file=$(cat booking.txt)
+
+  # Loop through booking.txt file
+  while IFS= read -r line; do
+    # Split booking.txt file by :
+    IFS=':' read -ra booking_dat <<<"$line"
+    # Check if block name is equal to block name in venue.txt file
+    if [ "$room_number" = "${booking_dat[1]}" ]; then
+      if [[ "$booking_date" != "${booking_dat[2]}" ]]; then
+        continue
+      fi
+
+      if [[ "$time_to" > "${booking_dat[3]}:${booking_dat[4]}" ]] && [[ ! "$time_to" > "${booking_dat[5]}:${booking_dat[6]}" ]]; then
+        echo 6
+        return
+      elif [[ "$time_from" < "${booking_dat[3]}:${booking_dat[4]}" ]] && [[ "$time_to" > "${booking_dat[5]}:${booking_dat[6]}" ]]; then
+        echo 7
+        return
+      fi
+    fi
+  done <<< "$booking_file"
 
   echo 0
 }
@@ -668,12 +715,6 @@ book_venue() {
 
   clear
   
-  
-
-  # while true; do
-    
-  # done
-
   while true; do
     echo -e "Booking Venue"
     echo -e "$break_line $break_line"
@@ -731,7 +772,7 @@ book_venue() {
 
     read -rp "Time From (24 Hour Format, hh:mm): " time_from
 
-    flag=$(check_time_from "$time_from")
+    flag=$(check_time_from "$room_number" "$booking_date" "$time_from")
 
     if([ "$flag" == "1" ]); then
       clear
@@ -745,11 +786,16 @@ book_venue() {
       clear
       echo -e "Time From is not within 08:00 to 19:30\nPlease try again\n\n"
       continue
+    elif([ "$flag" == "4" ]); then
+      clear
+      echo -e "Time From clashes with another booking\nPlease try again\n\n"
+      continue
     fi
 
+    # Input time to
     read -rp "Time To (24 Hour Format, hh:mm): " time_to
 
-    flag=$(check_time_to "$time_from" "$time_to")
+    flag=$(check_time_to "$room_number" "$booking_date" "$time_from" "$time_to")
 
     if([ "$flag" == "1" ]); then
       clear
@@ -770,6 +816,14 @@ book_venue() {
     elif([ "$flag" == "5" ]); then
       clear
       echo -e "Duration must be at least 30 minutes\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "6" ]); then
+      clear
+      echo -e "Time To clashes with another booking\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "7" ]); then
+      clear
+      echo -e "Another booking within time booked\nPlease try again\n\n"
       continue
     fi
 
@@ -798,7 +852,7 @@ book_venue() {
       echo -e "Data Booking: $booking_date" >>"$filename"
       echo -e "Time From: $time_from\t\t\t\tTime To: $time_to" >>"$filename"
       echo -e "Reason of Booking: $reason_of_booking" >>"$filename"
-      echo -e "\n\n\tThis is a computer generated receipt with no signature required" >>"$filename"
+      echo -e "\n\n\tThis is a computer generated receipt with no signature required\n" >>"$filename"
       return
     else
       clear
