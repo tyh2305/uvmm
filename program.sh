@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Title: University Venue Management System
 # Author1: Tan Yi Hong
 # Author2: Ong Tun Jiun
@@ -5,14 +7,15 @@
 # Course: BACS2093 Operating Systems
 # Purpose: University Venue Management System
 
-#!/bin/bash
-
 # Common Variables
 break_line="----------------------------------------"
 empty_line="\n"
 
-# Task 1:
-## Print main menu
+# Task 1 - Menu Script
+# ====================
+# Author: Tan Yi Hong
+# Description: Print Main Menu
+
 main_menu() {
   main_menu_text="University Venue Management Menu \n"
   main_menu_option="A - Register New Patron \nB - Search Patron Details \nC - Add New Venue \nD - List Venue \nE - Book Venue \n\nQ - Exit from program \n"
@@ -28,11 +31,24 @@ main_menu() {
   clear
 }
 
+# Task 2 - Patron Registration
+
+## Validation functions
+
+## Check Patron ID
+## ====================
+## Author: Tan Yi Hong
+## Description: Check if patron id is valid
+## Input: Patron ID
+## Output:
+##   0 - Patron ID is valid
+##   1 - Patron ID is invalid
+
 check_patron_id() {
 
   patron_id=$1
   if [ -z "$patron_id" ]; then
-    echo 2
+    echo 1
     return
   fi
 
@@ -49,7 +65,27 @@ check_patron_id() {
       return
     fi
   done
+
+  # Patron ID is not found
+  # Validate patron id format in 00AAA00000
+  if [[ "$patron_id" =~ ^[0-9]{2}[A-Z]{3}[0-9]{5}$ ]]; then
+    echo 0
+    return
+  fi
+
+  # Default invalid patron id
+  echo 1
+  return
 }
+
+## Check Patron Name
+## ====================
+## Author: Tan Yi Hong
+## Description: Check if patron name is valid
+## Input: Patron Name
+## Output:
+##   0 - Patron Name is valid
+##   1 - Patron Name is invalid
 
 check_patron_name() {
   patron_name=$1
@@ -65,6 +101,15 @@ check_patron_name() {
 
 }
 
+## Check Patron Contact
+## ====================
+## Author: Tan Yi Hong
+## Description: Check if patron contact is valid
+## Input: Patron Contact
+## Output:
+##   0 - Patron Contact is valid
+##   1 - Patron Contact is invalid
+
 check_patron_contact() {
   patron_contact=$1
 
@@ -79,6 +124,15 @@ check_patron_contact() {
 
 }
 
+## Check Patron Email
+## ====================
+## Author: Tan Yi Hong
+## Description: Check if patron email is valid
+## Input: Patron Email
+## Output:
+##   0 - Patron Email is valid
+##   1 - Patron Email is invalid
+
 check_patron_email() {
   patron_email=$1
 
@@ -91,6 +145,15 @@ check_patron_email() {
     return
   fi
 }
+
+## Utility functions
+
+## Write Patron
+## ====================
+## Author: Tan Yi Hong
+## Description: Write patron details to patron.txt file
+## Input: Patron ID, Patron Full Name, Patron Contact Number, Patron Email Address
+## Output: None
 
 write_patron() {
   patron_id=$1
@@ -116,11 +179,7 @@ register_patron() {
     flag=$(check_patron_id "$patron_id")
     if [ "$flag" == "1" ]; then
       clear
-      echo -e "Patron ID already exist \nPlease try again\n\n"
-      continue
-    elif [ "$flag" == 2 ]; then
-      clear
-      echo -e "Patron ID cannot be empty \nPlease try again\n\n"
+      echo -e "Patron ID invalid \nPlease try again\n\n"
       continue
     fi
 
@@ -131,10 +190,6 @@ register_patron() {
       clear
       echo -e "Patron Name should only contains alphabets\nPlease try again\n\n"
       continue
-      #elif [ "$flag" == "2" ]; then
-      # clear
-      # echo -e "Patron Name cannot be empty\nPlease try again\n\n"
-      # continue
     fi
 
     read -rp "Contact Number:" patron_contact_number
@@ -144,10 +199,6 @@ register_patron() {
       clear
       echo -e "Patron Contact Number should only contains number and + - symbol\nPlease try again\n\n"
       continue
-    elif [ "$flag" == "2" ]; then
-      clear
-      echo -e "Patron Contact Number cannot be empty\nPlease try again\n\n"
-      continue
     fi
 
     read -rp "Email Address:" patron_email_address
@@ -155,11 +206,7 @@ register_patron() {
     flag=$(check_patron_email "$patron_email_address")
     if [ "$flag" == "1" ]; then
       clear
-      echo -e "Patron Email Address is not valid\nPlease try again\n\n"
-      continue
-    elif [ "$flag" == "2" ]; then
-      clear
-      echo -e "Patron Email Address cannot be empty\nPlease try again\n\n"
+      echo -e "Patron Email Address invalid\nPlease try again\n\n"
       continue
     fi
     echo -e "$empty_line"
@@ -176,6 +223,12 @@ register_patron() {
 }
 
 ## Search Patron Details
+## ====================
+## Author: Tan Yi Hong
+## Description: Search patron details by patron id
+## Input: Patron ID
+## Output: Patron Full Name, Patron Contact Number, Patron Email Address
+
 search_patron_details() {
   while true; do
     echo -e "Search Patron Details"
@@ -214,16 +267,13 @@ search_patron_details() {
   done
 }
 
-
-
-
 # Check Block Name
 # ================
 # Author: Ong Tun Jiun
 # Description: Check block name only contains alphabets
 # Input: block_name
 # Output: 0 if block name only contains alphabets, 1 if block name contains other than alphabets
-check_block_name(){
+check_block_name() {
   block_name=$1
 
   # Check name only contains alphabets
@@ -243,7 +293,7 @@ check_block_name(){
 # Description: Check room number only contains alphabets and numbers
 # Input: room_number
 # Output: 0 if room number only contains alphabets and numbers, 1 if room number contains other than alphabets and numbers
-check_room_number(){
+check_room_number() {
   room_number=$1
 
   # Check room number only contains alphabets and numbers
@@ -263,7 +313,7 @@ check_room_number(){
 # Description: Check room type only contains alphabets
 # Input: room_type
 # Output: 0 if room type only contains alphabets, 1 if room type contains other than alphabets
-check_room_type(){
+check_room_type() {
   room_type=$1
 
   # Check room type only contains alphabets
@@ -283,7 +333,7 @@ check_room_type(){
 # Description: Check capacity only contains numbers
 # Input: capacity
 # Output: 0 if capacity only contains numbers, 1 if capacity contains other than numbers
-check_capacity(){
+check_capacity() {
   capacity=$1
 
   # Check capacity only contains numbers
@@ -303,7 +353,7 @@ check_capacity(){
 # Description: Check status only contains alphabets
 # Input: status
 # Output: 0 if status only contains alphabets, 1 if status contains other than alphabets
-check_status(){
+check_status() {
   status=$1
 
   # Check status only contains alphabets
@@ -359,7 +409,7 @@ add_new_venue() {
       clear
       echo -e "Room type should only contains alphabets\nPlease try again\n\n"
       continue
-    fi 
+    fi
 
     read -rp "Capacity: " capacity
     flag=$(check_capacity "$capacity")
@@ -381,7 +431,7 @@ add_new_venue() {
       continue
     fi
 
-    echo -e "$block_name:$room_number:$room_type:$capacity:$remarks:$status" >> venue.txt
+    echo -e "$block_name:$room_number:$room_type:$capacity:$remarks:$status" >>venue.txt
     read -rp "Add Another Venue? (y) es or (q)uit:" add_another_venue
     if [ "$add_another_venue" = "q" ]; then
       clear
@@ -440,7 +490,7 @@ book_venue() {
       patron_contact="${patron_dat[1]}"
       break
     fi
-  done <<< "$patron_file"
+  done <<<"$patron_file"
   if [ "$found" = false ]; then
     echo -e "Patron ID not found"
     return
