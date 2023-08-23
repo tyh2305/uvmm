@@ -1,2 +1,5 @@
+BlockName:RoomNumber:RoomType:Capacity:Remarks:Status
 SG:SG001:Lecture Hall:300:East Campus:Available
-B:101:Lab:30:Computer practical:Available
+A:A101:Tutorial Class:25:Close to Block B:Available
+A:A102:Tutorial Class:25:Close to Block B:Available
+A:A103:Tutorial Class:25:Test:Available
