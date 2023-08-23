@@ -725,6 +725,7 @@ book_venue() {
     venue_file=$(cat venue.txt)
 
     found=false
+    not_available=false
     flag=0
 
     # Read from file to find the room number
@@ -732,19 +733,31 @@ book_venue() {
       # Split venue.txt file by :
       IFS=':' read -ra venue_dat <<<"$line"
       # Check if room number is equal to room number in venue.txt file
+            
       if [ "$room_number" = "${venue_dat[1]}" ]; then
         found=true
+
+        venue_status=$(echo ${venue_dat[5]} | tr -d '[:space:]')
+        if [ "$venue_status" != "Available" ]; then
+          not_available=true
+          break
+        fi
+        
         echo -e "\nRoom Type: ${venue_dat[2]}"
         echo -e "Capacity: ${venue_dat[3]}"
         echo -e "Remarks: ${venue_dat[4]}"
-        echo -e "Status: ${venue_dat[5]}"
+        echo -e "Status: $venue_status"
         break
       fi
     done <<< "$venue_file"
 
     if [ "$found" = false ]; then
       clear
-      echo -e "Room Number not found"
+      echo -e "Room Number not found\n"
+      continue
+    elif [ "$not_available" = true ]; then
+      clear
+      echo -e "Room Number selected is not available\n"
       continue
     fi
 
