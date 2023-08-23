@@ -267,6 +267,9 @@ search_patron_details() {
   done
 }
 
+
+# Task 3
+
 # Check Block Name
 # ================
 # Author: Ong Tun Jiun
@@ -296,14 +299,30 @@ check_block_name() {
 check_room_number() {
   room_number=$1
 
+  flag=0
+
   # Check room number only contains alphabets and numbers
   if [[ "$room_number" =~ ^[a-zA-Z0-9]+$ ]]; then
-    echo 0
-    return
+    flag=0
   else
-    echo 1
-    return
+    flag=1
   fi
+
+  # Read venue.txt file
+  venue_file=$(cat venue.txt)
+
+  # Loop through venue.txt file
+  for line in $venue_file; do
+    # Split venue.txt file by :
+    IFS=':' read -ra venue_dat <<<"$line"
+    # Check if room number is equal to room number in venue.txt file
+    if [ "$room_number" = "${venue_dat[1]}" ]; then
+      flag=2
+    fi
+  done
+
+  echo $flag
+  return
 }
 
 # Check Room Type
@@ -398,6 +417,10 @@ add_new_venue() {
       clear
       echo -e "Room number should only contains alphabets and numbers\nPlease try again\n\n"
       continue
+    elif [ "$flag" == "2" ]; then
+      clear
+      echo -e "Room number already exist\nPlease try again\n\n"
+      continue
     else
       room_number=${room_number^^}
     fi
@@ -431,9 +454,11 @@ add_new_venue() {
       continue
     fi
 
-    echo -e "$block_name:$room_number:$room_type:$capacity:$remarks:$status" >>venue.txt
-    read -rp "Add Another Venue? (y) es or (q)uit:" add_another_venue
-    if [ "$add_another_venue" = "q" ]; then
+    echo -e "$block_name:$room_number:$room_type:$capacity:$remarks:$status" >> venue.txt
+
+    echo -e "$empty_line"
+    read -rp "Add Another Venue? Type any to continue, Type Q to quit: " add_another_venue
+    if [ "$add_another_venue" = "q" ] || [ "$add_another_venue" = "Q" ] ; then
       clear
       break
     fi
@@ -441,29 +466,70 @@ add_new_venue() {
   done
 }
 
-## List Venue Details
+# List Venue Details
+# =============
+# Author: Ong Tun Jiun
+# Task: 3 - List Venue Details
+# Description: Get user input, validate input and list venue details
+# Input: -
+# Output: -
+
 list_venue_details() {
   while true; do
     echo -e "List Venue Details"
-    read -rp "Enter Block name:" block_name
+
+    # Input block name and do validation
+    read -rp "Enter Block name (Only alphabets):" block_name
+    flag=$(check_block_name "$block_name")
+
+    if [ "$flag" == "1" ]; then
+      clear
+      echo -e "Block Name should only contains alphabets\nPlease try again\n\n"
+      continue
+    else
+      block_name=${block_name^^}
+    fi
+
     echo -e "$break_line"
+
+    touch temp.txt
+
+    # Print Table Header
+    # echo -e "Room Number \tRoom Type \tCapacity \tRemarks \t\tStatus"
+    echo -e "Room Number:Room Type:Capacity:Remarks:Status" >> temp.txt
 
     # Read venue.txt file
     venue_file=$(cat venue.txt)
-    # Print Table Header
-    echo -e "Room Number \t\tRoom Type \tCapacity \tRemarks \tStatus"
-    # Split venue.txt file by new line
+
+
     # Loop through venue.txt file
-    for line in $venue_file; do
+    while IFS= read -r line; do
       # Split venue.txt file by :
       IFS=':' read -ra venue_dat <<<"$line"
       # Check if block name is equal to block name in venue.txt file
       if [ "$block_name" = "${venue_dat[0]}" ]; then
-        echo -e "${venue_dat[1]} \t\t\t${venue_dat[2]} \t\t${venue_dat[3]} \t\t${venue_dat[4]} \t\t${venue_dat[5]}"
+        # Save data to temp.txt file
+        echo -e "${venue_dat[1]}:${venue_dat[2]}:${venue_dat[3]}:${venue_dat[4]}:${venue_dat[5]}" >> temp.txt
       fi
-    done
-    read -rp "Search Another Block Venue? (y) es or (q)uit:" search_another_venue
-    if [ "$search_another_venue" = "q" ]; then
+    done <<< "$venue_file"
+
+    # Count number of lines in temp.txt file
+    noOfLines=$(wc -l < temp.txt)
+
+    # Check if number of lines is 1, then print no venue found
+    if [ "$noOfLines" -eq 1 ]; then
+      echo -e "No venue found"
+    else
+      # Print table with column separator :
+      column -t -s ':' temp.txt
+    fi
+
+    rm temp.txt
+
+    echo -e "$empty_line"
+    read -rp "Search Another Block Venue? Type any to continue, Type Q to quit: " search_another_venue
+    if [ "$search_another_venue" = "q" ] || [ "$search_another_venue" = "Q" ]; then
+      clear
       break
     fi
     clear
