@@ -319,10 +319,8 @@ check_room_number() {
 
   flag=0
 
-  # Check room number only contains alphabets and numbers
-  if [[ "$room_number" =~ ^[a-zA-Z0-9]+$ ]]; then
-    flag=0
-  else
+  # Check room number have alphabet for first character and the rest only contains alphabets and numbers
+  if [[ ! "$room_number" =~ ^[a-zA-Z][a-zA-Z0-9]+$ ]]; then
     flag=1
   fi
 
@@ -374,11 +372,11 @@ check_capacity() {
   capacity=$1
 
   # Check capacity only contains numbers
-  if [[ "$capacity" =~ ^[0-9]+$ ]]; then
-    echo 0
-    return
-  else
+  if [[ ! "$capacity" =~ ^[0-9]+$ ]]; then
     echo 1
+    return
+  elif [[ "$capacity" -eq 0 ]]; then
+    echo 2
     return
   fi
 }
@@ -433,7 +431,7 @@ add_new_venue() {
 
     if [ "$flag" == "1" ]; then
       clear
-      echo -e "Room number should only contains alphabets and numbers\nPlease try again\n\n"
+      echo -e "Room number should only contains alphabet for the first word and alphabets, and numbers for the rest\nPlease try again\n\n"
       continue
     elif [ "$flag" == "2" ]; then
       clear
@@ -458,6 +456,10 @@ add_new_venue() {
     if [ "$flag" == "1" ]; then
       clear
       echo -e "Capacity should only contains numbers\nPlease try again\n\n"
+      continue
+    elif [ "$flag" == "2" ]; then
+      clear
+      echo -e "Capacity should not be 0\nPlease try again\n\n"
       continue
     fi
 
