@@ -17,6 +17,8 @@ empty_line="\n"
 # Description: Print Main Menu
 
 main_menu() {
+  clear
+
   main_menu_text="University Venue Management Menu \n"
   main_menu_option="A - Register New Patron \nB - Search Patron Details \nC - Add New Venue \nD - List Venue \nE - Book Venue \n\nQ - Exit from program \n"
   main_menu_choice="Please select a choice:"
@@ -261,6 +263,7 @@ search_patron_details() {
 
     read -rp "Search Another Patron? (y) es or (q)uit:" search_another_patron
     if [ "$search_another_patron" = "q" ]; then
+      clear
       break
     fi
     clear
@@ -536,84 +539,274 @@ list_venue_details() {
   done
 }
 
+# Check Booking Date
+check_booking_date() {
+  booking_date=$1
+  flag=0
+
+  # Check if booking date follows the format of mm/dd/yyyy
+  if [[ ! "$booking_date" =~ ^[0-9]{2}/[0-9]{2}/[0-9]{4}$ ]]; then
+    flag=1
+  # Check if booking date is valid
+  elif ! date -d "$booking_date" >/dev/null 2>&1; then
+    flag=2
+  # Check if booking date is tomorrow's date
+  elif [[ "$booking_date" != "$(date --date=tomorrow +%m/%d/%Y)" ]]; then
+    flag=3
+  fi
+
+  echo $flag
+}
+
+# Check Time From
+check_time_from() {
+  time_from=$1
+  flag=0
+
+  # Check if time from follows the format of hh:mm
+  if [[ ! "$time_from" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
+    flag=1
+  # Check if time is valid
+  elif ! date -d "$time_from" >/dev/null 2>&1; then
+    flag=2
+  # Check if time from is between 08:00 to 19.30
+  elif [[ "$time_from" < "08:00" ]] || [[ "$time_from" > "19:30" ]]; then
+    flag=3
+  fi 
+  
+  echo $flag
+}
+
+# Check Time To
+check_time_to() {
+  time_from=$1
+  time_to=$2
+  # flag=0
+
+  # Check if time to follows the format of hh:mm
+  if [[ ! "$time_to" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
+    echo 1
+    return
+  # Check if time is valid
+  elif ! date -d "$time_to" >/dev/null 2>&1; then
+    echo 2
+    return
+  # Check if time to is between 08:30 to 20:00
+  elif [[ "$time_to" < "08:30" ]] || [[ "$time_to" > "20:00" ]]; then
+    echo 3
+    return 
+  # Check if time to is greater than time from
+  elif [[ ! "$time_to" > "$time_from" ]]; then
+    echo 4
+    return
+  fi
+
+  # Convert time from and time to to seconds
+  time_from_seconds=$(date -d "$time_from" +%s)
+  time_to_seconds=$(date -d "$time_to" +%s)
+
+  # Calculate duration
+  duration=$((time_to_seconds - time_from_seconds))
+
+  # Check if duration is at least 30 minutes
+  if [[ "$duration" -lt "1800" ]]; then
+    echo 5
+    return
+  fi
+
+  echo 0
+}
+
+
 # Task 4
 ## Book Venue
 book_venue() {
-  echo -e "Patron Details Validation"
-  echo -e "$break_line $break_line"
-  read -rp "Please enter the Patron's ID Number:" patron_id
+  while true; do
+    echo -e "Patron Details Validation"
+    echo -e "$break_line $break_line"
 
-  # Read from file to find the patron name
-  patron_file=$(cat patron.txt)
-  found=false
-  while IFS= read -r line; do
-    # Split patron.txt file by :
-    IFS=':' read -ra patron_dat <<<"$line"
-    # Check if patron id is equal to patron id in patron.txt file
-    if [ "$patron_id" = "${patron_dat[0]}" ]; then
-      echo -e "Patron Name: ${patron_dat[1]}"
-      found=true
-      patron_contact="${patron_dat[1]}"
-      break
-    fi
-  done <<<"$patron_file"
-  if [ "$found" = false ]; then
-    echo -e "Patron ID not found"
-    return
-  fi
+    read -rp "Please enter the Patron's ID Number:" patron_id
 
-  read -rp "Press (n) to proceed Book Venue or (q) to return to University Venue Management Menu:" proceed_book_venue
-  if [ "$proceed_book_venue" = "q" ]; then
-    return
-  fi
-
-  echo -e "Booking Venue"
-  echo -e "$break_line $break_line"
-  read -rp "Please enter the Room Number:" room_number
-
-  # Read from file to find the room number
-  for line in $venue_file; do
-    # Split venue.txt file by :
-    IFS=':' read -ra venue_dat <<<"$line"
-    # Check if room number is equal to room number in venue.txt file
-    if [ "$room_number" = "${venue_dat[1]}" ]; then
-      echo -e "Room Type: ${venue_dat[2]}"
-      echo -e "Capacity: ${venue_dat[3]}"
-      echo -e "Remarks: ${venue_dat[4]}"
-      echo -e "Status: ${venue_dat[5]}"
+    # Read from file to find the patron name
+    patron_file=$(cat patron.txt)
+    found=false
+    while IFS= read -r line; do
+      # Split patron.txt file by :
+      IFS=':' read -ra patron_dat <<<"$line"
+      # Check if patron id is equal to patron id in patron.txt file
+      if [ "$patron_id" = "${patron_dat[0]}" ]; then
+        echo -e "Patron Name: ${patron_dat[1]}"
+        found=true
+        patron_contact="${patron_dat[1]}"
+        break
+      fi
+    done <<< "$patron_file"
+    if [ "$found" = false ]; then
+      clear
+      echo -e "Patron ID not found"
+      echo -e "$empty_line"
+      continue
+    else
       break
     fi
   done
 
-  echo -e "$break_line"
-  echo -e "Notes: The booking hours shall be from 8am to 8pm only. The booking duration shall be at least 30 minutes per booking. \n\n"
+  echo -e "$empty_line"
 
-  echo -e "Please enter the following details: \n\n"
-  read -rp "Booking Date (mm-dd-yyyy):" booking_date
-  read -rp "Time From (hh:mm):" time_from
-  read -rp "Time To (hh:mm):" time_to
-  read -rp "Reason of Booking:" reason_of_booking
-
-  read -rp "Press (s) to save and generate the venue booking details or Press (c) to cancel the Venue Booking and return to University Venue Management Menu:" save_generate_venue_booking
-  if [ "$save_generate_venue_booking" = "c" ]; then
-    exit
-  fi
-
-  # Save data to booking.txt file
-  echo -e "$patron_id:$room_number:$booking_date:$time_from:$time_to:$reason_of_booking" >>booking.txt
+  while true; do
+    read -rp "Press (n) to proceed Book Venue or (q) to return to University Venue Management Menu:" proceed_book_venue
+    if [ "$proceed_book_venue" = "q" ] || [ "$proceed_book_venue" = "Q" ]; then
+      clear
+      return
+    elif [ "$proceed_book_venue" = "n" ] || [ "$proceed_book_venue" = "N" ]; then
+      break
+    else
+      # Delete previous two lines and print invalid input
+      echo -e "\033[2A\033[KInvalid input"
+    fi
+  done
 
   clear
+  
+  
 
-  filename="${patron_id}_${room_number}_${booking_date}.txt"
-  touch "$filename"
-  echo -e "Venue Booking Details \n\n" >>"$filename"
-  echo -e "Patron ID: $patron_id \t\t\t\t Patron Name: $patron_contact" >>"$filename"
-  echo -e "Room Number: $room_number" >>"$filename"
-  echo -e "Data Booking: $booking_date" >>"$filename"
-  echo -e "Time From: $time_from \t\t\t\t Time To: $time_to" >>"$filename"
-  echo -e "Reason of Booking: $reason_of_booking" >>"$filename"
-  echo -e "\n\n \t\t This is a computer generated receipt with no signature required" >>"$filename"
+  # while true; do
+    
+  # done
+
+  while true; do
+    echo -e "Booking Venue"
+    echo -e "$break_line $break_line"
+
+    read -rp "Please enter the Room Number:" room_number
+
+    # Read venue.txt file
+    venue_file=$(cat venue.txt)
+
+    found=false
+    flag=0
+
+    # Read from file to find the room number
+    while IFS= read -r line; do
+      # Split venue.txt file by :
+      IFS=':' read -ra venue_dat <<<"$line"
+      # Check if room number is equal to room number in venue.txt file
+      if [ "$room_number" = "${venue_dat[1]}" ]; then
+        found=true
+        echo -e "\nRoom Type: ${venue_dat[2]}"
+        echo -e "Capacity: ${venue_dat[3]}"
+        echo -e "Remarks: ${venue_dat[4]}"
+        echo -e "Status: ${venue_dat[5]}"
+        break
+      fi
+    done <<< "$venue_file"
+
+    if [ "$found" = false ]; then
+      clear
+      echo -e "Room Number not found"
+      continue
+    fi
+
+    echo -e "\n$break_line"
+    echo -e "Notes: The booking hours shall be from 8am to 8pm only. The booking duration shall be at least 30 minutes per booking. \n\n"
+
+    echo -e "Please enter the following details: \n\n"
+    read -rp "Booking Date (mm/dd/yyyy): " booking_date
+
+    flag=$(check_booking_date "$booking_date")
+
+    if([ "$flag" == "1" ]); then
+      clear
+      echo -e "Format of Booking Date is not valid\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "2" ]); then
+      clear
+      echo -e "Booking Date does not exist\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "3" ]); then
+      clear
+      echo -e "Booking Date must be tomorrow's date\nPlease try again\n\n"
+      continue
+    fi
+
+    read -rp "Time From (24 Hour Format, hh:mm): " time_from
+
+    flag=$(check_time_from "$time_from")
+
+    if([ "$flag" == "1" ]); then
+      clear
+      echo -e "Format of Time From is not valid\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "2" ]); then
+      clear
+      echo -e "Time From entered does not exist\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "3" ]); then
+      clear
+      echo -e "Time From is not within 08:00 to 19:30\nPlease try again\n\n"
+      continue
+    fi
+
+    read -rp "Time To (24 Hour Format, hh:mm): " time_to
+
+    flag=$(check_time_to "$time_from" "$time_to")
+
+    if([ "$flag" == "1" ]); then
+      clear
+      echo -e "Format of Time To is not valid\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "2" ]); then
+      clear
+      echo -e "Time To entered does not exist\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "3" ]); then
+      clear
+      echo -e "Time To is not within 08:30 to 20:00\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "4" ]); then
+      clear
+      echo -e "Time To is not greater than Time From\nPlease try again\n\n"
+      continue
+    elif([ "$flag" == "5" ]); then
+      clear
+      echo -e "Duration must be at least 30 minutes\nPlease try again\n\n"
+      continue
+    fi
+
+    break
+  done
+
+  read -rp "Reason of Booking: " reason_of_booking
+
+  while true; do
+    read -rp "Press (s) to save and generate the venue booking details or Press (c) to cancel the Venue Booking and return to University Venue Management Menu:" save_generate_venue_booking
+    if [ "$save_generate_venue_booking" = "c" ] || [ "$save_generate_venue_booking" = "C" ] ; then
+      return
+    elif [ "$save_generate_venue_booking" = "s" ] || [ "$save_generate_venue_booking" = "S" ] ; then  
+      # Save data to booking.txt file
+      echo -e "$patron_id:$room_number:$booking_date:$time_from:$time_to:$reason_of_booking" >>booking.txt
+
+      # replace booking date / with -
+      filename_booking_date=$(echo "$booking_date" | tr '/' '-')
+
+      filename="${patron_id}_${room_number}_${filename_booking_date}.txt"
+      touch "$filename"
+
+      echo -e "\t\t\tVenue Booking Receipt \n" >>"$filename"
+      echo -e "Patron ID: $patron_id\t\t\tPatron Name: $patron_contact" >>"$filename"
+      echo -e "Room Number: $room_number" >>"$filename"
+      echo -e "Data Booking: $booking_date" >>"$filename"
+      echo -e "Time From: $time_from\t\t\t\tTime To: $time_to" >>"$filename"
+      echo -e "Reason of Booking: $reason_of_booking" >>"$filename"
+      echo -e "\n\n\tThis is a computer generated receipt with no signature required" >>"$filename"
+      return
+    else
+      clear
+      echo -e "Invalid input\n\n"
+    fi
+  done
 }
+
 cont=true
 while [ "$cont" == true ]; do
   main_menu
