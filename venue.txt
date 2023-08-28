@@ -2,4 +2,6 @@ BlockName:RoomNumber:RoomType:Capacity:Remarks:Status
 SG:SG001:Lecture Hall:300:East Campus:Available
 A:A101:Tutorial Class:25:Close to Block B:Available
 A:A102:Tutorial Class:25:Close to Block B:Available
-A:A103:Tutorial Class:25:Test:Available
+A:A103:Tutorial Class:25:Test:Under Maintenance
+H:H101:Tutorial Class:25:None:Available
+K:K301:Tutorial Class:2:3rd Floor:Available
