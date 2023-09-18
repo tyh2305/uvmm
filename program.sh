@@ -291,6 +291,7 @@ search_patron_details() {
 # Check Block Name
 # ================
 # Author: Ong Tun Jiun
+# Task: 3 - Add New Venue
 # Description: Check block name only contains alphabets
 # Input: block_name
 # Output: 0 if block name only contains alphabets, 1 if block name contains other than alphabets
@@ -571,7 +572,16 @@ list_venue_details() {
   done
 }
 
+# Task 4
+
 # Check Booking Date
+# ==================
+# Author: Ong Tun Jiun
+# Task: 4 - Book Venue
+# Description: Check booking date format, booking date is valid and booking date is tomorrow's date
+# Input: booking_date
+# Output: 0 if booking date is valid, 1 if booking date format is invalid, 2 if booking date is invalid, 3 if booking date is not tomorrow's date
+
 check_booking_date() {
   booking_date=$1
   flag=0
@@ -591,6 +601,13 @@ check_booking_date() {
 }
 
 # Check Time From
+# ===============
+# Author: Ong Tun Jiun
+# Task: 4 - Book Venue
+# Description: Check time from format, time from is valid, time from is between 08:00 to 19.30 and time from does not clash with another booking
+# Input: room_number, booking_date, time_from
+# Output: 0 if time from is valid, 1 if time from format is invalid, 2 if time from is invalid, 3 if time from is not between 08:00 to 19.30, 4 if time from clashes with another booking
+
 check_time_from() {
   room_number=$1
   booking_date=$2
@@ -634,6 +651,13 @@ check_time_from() {
 }
 
 # Check Time To
+# =============
+# Author: Ong Tun Jiun
+# Task: 4 - Book Venue
+# Description: Check time to format, time to is valid, time to is between 08:30 to 20.00, time to is greater than time from, time to is at least 30 minutes and time to does not clash with another booking
+# Input: room_number, booking_date, time_from, time_to
+# Output: 0 if time to is valid, 1 if time to format is invalid, 2 if time to is invalid, 3 if time to is not between 08:30 to 20.00, 4 if time to is not greater than time from, 5 if time to is not at least 30 minutes, 6 if time to clashes with another booking, 7 if another booking within time booked
+
 check_time_to() {
   room_number=$1
   booking_date=$2
@@ -698,8 +722,14 @@ check_time_to() {
 }
 
 
-# Task 4
-## Book Venue
+# Book Venue
+# ==========
+# Author: Tan Yi Hong & Ong Tun Jiun
+# Task: 4 - Book Venue
+# Description: Get user input, validate input and save to booking.txt file
+# Input: -
+# Output: -
+
 book_venue() {
   while true; do
     echo -e "Patron Details Validation"
@@ -908,6 +938,15 @@ book_venue() {
     fi
   done
 }
+
+
+# Main Menu
+# =========
+# Author: Tan Yi Hong
+# Task: 1 - Main Menu
+# Description: Display main menu
+# Input: -
+# Output: -
 
 cont=true
 while [ "$cont" == true ]; do
