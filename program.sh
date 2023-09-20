@@ -18,7 +18,7 @@ empty_line="\n"
 
 main_menu() {
   clear
-
+  
   main_menu_text="University Venue Management Menu \n"
   main_menu_option="A - Register New Patron \nB - Search Patron Details \nC - Add New Venue \nD - List Venue \nE - Book Venue \n\nQ - Exit from program \n"
   main_menu_choice="Please select a choice:"
@@ -927,7 +927,7 @@ book_venue() {
       echo -e "\t\t\tVenue Booking Receipt \n" >>"$filename"
       echo -e "Patron ID: $patron_id\t\t\tPatron Name: $patron_contact" >>"$filename"
       echo -e "Room Number: $room_number" >>"$filename"
-      echo -e "Data Booking: $booking_date" >>"$filename"
+      echo -e "Date Booking: $booking_date" >>"$filename"
       echo -e "Time From: $time_from\t\t\t\tTime To: $time_to" >>"$filename"
       echo -e "Reason of Booking: $reason_of_booking" >>"$filename"
       echo -e "\n\n\tThis is a computer generated receipt with no signature required\n" >>"$filename"
